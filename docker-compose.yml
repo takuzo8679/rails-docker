@@ -15,9 +15,10 @@ services:
     # ホストとコンテナのファイルシステムの同期（リポジトリトップと/rails-docker)
     volumes:
       - .:/rails-docker
-    # dbにアクセスするpasswordを追加(.envより)
+    # 環境変数
     environment:
-      - DATABASE_PASSWORD=postgres
+      # dbにアクセスするpasswordを追加(.envより)。初期ユーザーはpostgresになるのでPOSTGRES_PASSWORDと一致させる
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
     # dbの後に構築
     depends_on:
       - db
@@ -35,7 +36,8 @@ services:
     # 永続化のためのvolume指定
     volumes:
       - db-data:/var/lib/postgresql/data
-    # posgreを使用するために記載
     environment:
+      # デフォルト値だが記載がないと動かない場合があるので記載
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      # パスワードを変更。web側のDATABASE_PASSWORDと同じ値にする
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
