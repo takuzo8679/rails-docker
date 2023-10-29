@@ -1,0 +1,41 @@
+version: "3"
+
+# 永続化のためのvolume作成
+volumes:
+  db-data:
+
+services:
+  web:
+    build: .
+    # コンテナ起動時にmigrate & server起動
+    command: bash -c "rails db:migrate && rails s -p 3000 -b '0.0.0.0'"
+    # railsで使用するportを解放
+    ports:
+      - 3000:3000
+    # ホストとコンテナのファイルシステムの同期（リポジトリトップと/rails-docker)
+    volumes:
+      - .:/rails-docker
+    # dbにアクセスするpasswordを追加(.envより)
+    environment:
+      - DATABASE_PASSWORD=postgres
+    # dbの後に構築
+    depends_on:
+      - db
+    # wb-dbを接続
+    links:
+      - db
+    # コンテナログイン可能化
+    tty: true
+    # 標準入力を許可
+    stdin_open: true
+  # DB側の設定
+  db:
+    # Dockerfile不要でimage指定
+    image: postgres:12
+    # 永続化のためのvolume指定
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    # posgreを使用するために記載
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
